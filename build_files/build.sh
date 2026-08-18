@@ -17,16 +17,13 @@ dnf5 -y install coolercontrol coolercontrold liquidctl \
   || echo "WARN: coolercontrol not baked in (run 'ujust install-coolercontrol' after rebase)"
 systemctl enable coolercontrold.service 2>/dev/null || true
 
-### 3. nct6687 fan driver  (ESSENTIAL)
+### 3. nct6687 fan driver  (ESSENTIAL) — build directly against the kernel tree
 dnf5 -y install gcc make git
-if ! dnf5 -y install "kernel-devel-${KVER}"; then
-  dnf5 -y copr enable bazzite-org/bazzite || true
-  dnf5 -y install "kernel-devel-${KVER}"
-fi
+dnf5 -y install "kernel-devel-${KVER}" || { dnf5 -y copr enable bazzite-org/bazzite || true; dnf5 -y install "kernel-devel-${KVER}"; }
 test -d "/usr/src/kernels/${KVER}" || { echo "FATAL: no kernel-devel matching ${KVER}"; exit 1; }
 
 git clone --depth=1 https://github.com/Fred78290/nct6687d /tmp/nct6687d
-make -C /tmp/nct6687d TARGET="${KVER}"
+make -C "/usr/src/kernels/${KVER}" M=/tmp/nct6687d modules
 KO="$(find /tmp/nct6687d -name 'nct6687.ko' | head -1)"
 test -n "${KO}" || { echo "FATAL: nct6687.ko not produced"; exit 1; }
 install -Dm644 "${KO}" "/usr/lib/modules/${KVER}/extra/nct6687.ko"
