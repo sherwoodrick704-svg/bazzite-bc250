@@ -1,6 +1,6 @@
 # Personal BC250 image: stock Bazzite (daily updates) + BC250 bits baked in.
 # Base = the exact stock image you started on. Swap the tag if you ever change desktop.
-FROM ghcr.io/ublue-os/bazzite-deck-gnome:stable
+FROM ghcr.io/ublue-os/bazzite-deck-gnome:stable-44.20260908
 
 # Copy build script and run it, then finalize the ostree container.
 COPY build_files /tmp/build_files
